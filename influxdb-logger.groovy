@@ -78,85 +78,86 @@
  *   2023-03-18 Denny Page      Fix valve attribute
  *                              Clean up logging
  *   2023-04-24 Denny Page      Don't send null units to InfluxDB
+ *   2023-07-15 Scott Chen      Support hub variables
  *****************************************************************************************************************/
 
 // Note: Items marked as "Migration" are intended to be kept for a period of time and then be removed circa end of 2023
 
 definition(
-    name: "InfluxDB Logger",
-    namespace: "nowhereville",
-    author: "Hubitat Community",
-    description: "Log device states to InfluxDB",
-    category: "Utility",
-    importUrl: "https://raw.githubusercontent.com/HubitatCommunity/InfluxDB-Logger/master/influxdb-logger.groovy",
-    iconUrl: "",
-    iconX2Url: "",
-    iconX3Url: "",
-    singleThreaded: true
+        name: "InfluxDB Logger",
+        namespace: "nowhereville",
+        author: "Hubitat Community",
+        description: "Log device states to InfluxDB",
+        category: "Utility",
+        importUrl: "https://raw.githubusercontent.com/HubitatCommunity/InfluxDB-Logger/master/influxdb-logger.groovy",
+        iconUrl: "",
+        iconX2Url: "",
+        iconX3Url: "",
+        singleThreaded: true
 )
 
 import groovy.transform.Field
 
 // Device type list
 @Field static final Map<String,Map> deviceTypeMap = [
-    'accelerometers': [ title: 'Accelerometers', capability: 'accelerationSensor', attributes: ['acceleration'] ],
-    'alarms': [ title: 'Alarms', capability: 'alarm', attributes: ['alarm'] ],
-    'batteries': [ title: 'Batteries', capability: 'battery', attributes: ['battery'] ],
-    'beacons': [ title: 'Beacons', capability: 'beacon', attributes: ['presence'] ],
-    'buttons': [ title: 'Buttons', capability: 'pushableButton', attributes: ['pushed', 'doubleTapped', 'held', 'released'] ],
-    'cos': [ title: 'Carbon Monoxide Detectors', capability: 'carbonMonoxideDetector', attributes: ['carbonMonoxide'] ],
-    'co2s': [ title: 'Carbon Dioxide Detectors', capability: 'carbonDioxideMeasurement', attributes: ['carbonDioxide'] ],
-    'colors': [ title: 'Color Controllers', capability: 'colorControl', attributes: ['hue', 'saturation', 'color'] ],
-    'consumables': [ title: 'Consumables', capability: 'consumable', attributes: ['consumableStatus'] ],
-    'contacts': [ title: 'Contact Sensors', capability: 'contactSensor', attributes: ['contact'] ],
-    'currentMeters': [ title: 'Current Meters', capability: 'currentMeter', attributes: ['amperage'] ],
-    'doorsControllers': [ title: 'Door Controllers', capability: 'doorControl', attributes: ['door'] ],
-    'energyMeters': [ title: 'Energy Meters', capability: 'energyMeter', attributes: ['energy'] ],
-    'filters': [ title: 'Filters', capability: 'filterStatus', attributes: ['filterStatus'] ],
-    'gasDetectors': [ title: 'Gas Detectors', capability: 'gasDetector', attributes: ['naturalGas'] ],
-    'humidities': [ title: 'Humidity Meters', capability: 'relativeHumidityMeasurement', attributes: ['humidity'] ],
-    'illuminances': [ title: 'Illuminance Meters', capability: 'illuminanceMeasurement', attributes: ['illuminance'] ],
-    'liquidFlowMeters': [ title: 'Liquid Flow Meters', capability: 'liquidFlowRate', attributes: ['rate'] ],
-    'locks': [ title: 'Locks', capability: 'lock', attributes: ['lock'] ],
-    'motions': [ title: 'Motion Sensors', capability: 'motionSensor', attributes: ['motion'] ],
-    'musicPlayers': [ title: 'Music Players', capability: 'musicPlayer', attributes: ['status', 'level', 'trackDescription', 'trackData', 'mute'] ],
-    'peds': [ title: 'Pedometers', capability: 'stepSensor', attributes: ['steps', 'goal'] ],
-    'phMeters': [ title: 'pH Meters', capability: 'pHMeasurement', attributes: ['pH'] ],
-    'powerMeters': [ title: 'Power Meters', capability: 'powerMeter', attributes: ['power'] ],
-    'powerSources': [ title: 'Power Sources', capability: 'powerSource', attributes: ['powerSource'] ],
-    'presences': [ title: 'Presence Sensors', capability: 'presenceSensor', attributes: ['presence'] ],
-    'pressures': [ title: 'Pressure Sensors', capability: 'pressureMeasurement', attributes: ['pressure'] ],
-    'shockSensors': [ title: 'Shock Sensors', capability: 'shockSensor', attributes: ['shock'] ],
-    'signalStrengthMeters': [ title: 'Signal Strength Meters', capability: 'signalStrength', attributes: ['lqi', 'rssi'] ],
-    'sleepSensors': [ title: 'Sleep Sensors', capability: 'sleepSensor', attributes: ['sleeping'] ],
-    'smokeDetectors': [ title: 'Smoke Detectors', capability: 'smokeDetector', attributes: ['smoke'] ],
-    'soundSensors': [ title: 'Sound Sensors', capability: 'soundSensor', attributes: ['sound'] ],
-    'spls': [ title: 'Sound Pressure Level Sensors', capability: 'soundPressureLevel', attributes: ['soundPressureLevel'] ],
-    'switches': [ title: 'Switches', capability: 'switch', attributes: ['switch'] ],
-    'switchLevels': [ title: 'Switch Levels', capability: 'switchLevel', attributes: ['level'] ],
-    'tamperAlerts': [ title: 'Tamper Alerts', capability: 'tamperAlert', attributes: ['tamper'] ],
-    'temperatures': [ title: 'Temperature Sensors', capability: 'temperatureMeasurement', attributes: ['temperature'] ],
-    'thermostats': [ title: 'Thermostats', capability: 'thermostat', attributes: ['temperature', 'heatingSetpoint', 'coolingSetpoint', 'thermostatSetpoint', 'thermostatMode', 'thermostatFanMode', 'thermostatOperatingState', 'thermostatSetpointMode', 'scheduledSetpoint'] ],
-    'threeAxis': [ title: 'Three-axis (Orientation) Sensors', capability: 'threeAxis', attributes: ['threeAxis'] ],
-    'touchs': [ title: 'Touch Sensors', capability: 'touchSensor', attributes: ['touch'] ],
-    'uvs': [ title: 'UV Sensors', capability: 'ultravioletIndex', attributes: ['ultravioletIndex'] ],
-    'valves': [ title: 'Valves', capability: 'valve', attributes: ['valve'] ],
-    'volts': [ title: 'Voltage Meters', capability: 'voltageMeasurement', attributes: ['voltage'] ],
-    'waterSensors': [ title: 'Water Sensors', capability: 'waterSensor', attributes: ['water'] ],
-    'windowShades': [ title: 'Window Shades', capability: 'windowShade', attributes: ['windowShade'] ]
+        'accelerometers': [ title: 'Accelerometers', capability: 'accelerationSensor', attributes: ['acceleration'] ],
+        'alarms': [ title: 'Alarms', capability: 'alarm', attributes: ['alarm'] ],
+        'batteries': [ title: 'Batteries', capability: 'battery', attributes: ['battery'] ],
+        'beacons': [ title: 'Beacons', capability: 'beacon', attributes: ['presence'] ],
+        'buttons': [ title: 'Buttons', capability: 'pushableButton', attributes: ['pushed', 'doubleTapped', 'held', 'released'] ],
+        'cos': [ title: 'Carbon Monoxide Detectors', capability: 'carbonMonoxideDetector', attributes: ['carbonMonoxide'] ],
+        'co2s': [ title: 'Carbon Dioxide Detectors', capability: 'carbonDioxideMeasurement', attributes: ['carbonDioxide'] ],
+        'colors': [ title: 'Color Controllers', capability: 'colorControl', attributes: ['hue', 'saturation', 'color'] ],
+        'consumables': [ title: 'Consumables', capability: 'consumable', attributes: ['consumableStatus'] ],
+        'contacts': [ title: 'Contact Sensors', capability: 'contactSensor', attributes: ['contact'] ],
+        'currentMeters': [ title: 'Current Meters', capability: 'currentMeter', attributes: ['amperage'] ],
+        'doorsControllers': [ title: 'Door Controllers', capability: 'doorControl', attributes: ['door'] ],
+        'energyMeters': [ title: 'Energy Meters', capability: 'energyMeter', attributes: ['energy'] ],
+        'filters': [ title: 'Filters', capability: 'filterStatus', attributes: ['filterStatus'] ],
+        'gasDetectors': [ title: 'Gas Detectors', capability: 'gasDetector', attributes: ['naturalGas'] ],
+        'humidities': [ title: 'Humidity Meters', capability: 'relativeHumidityMeasurement', attributes: ['humidity'] ],
+        'illuminances': [ title: 'Illuminance Meters', capability: 'illuminanceMeasurement', attributes: ['illuminance'] ],
+        'liquidFlowMeters': [ title: 'Liquid Flow Meters', capability: 'liquidFlowRate', attributes: ['rate'] ],
+        'locks': [ title: 'Locks', capability: 'lock', attributes: ['lock'] ],
+        'motions': [ title: 'Motion Sensors', capability: 'motionSensor', attributes: ['motion'] ],
+        'musicPlayers': [ title: 'Music Players', capability: 'musicPlayer', attributes: ['status', 'level', 'trackDescription', 'trackData', 'mute'] ],
+        'peds': [ title: 'Pedometers', capability: 'stepSensor', attributes: ['steps', 'goal'] ],
+        'phMeters': [ title: 'pH Meters', capability: 'pHMeasurement', attributes: ['pH'] ],
+        'powerMeters': [ title: 'Power Meters', capability: 'powerMeter', attributes: ['power'] ],
+        'powerSources': [ title: 'Power Sources', capability: 'powerSource', attributes: ['powerSource'] ],
+        'presences': [ title: 'Presence Sensors', capability: 'presenceSensor', attributes: ['presence'] ],
+        'pressures': [ title: 'Pressure Sensors', capability: 'pressureMeasurement', attributes: ['pressure'] ],
+        'shockSensors': [ title: 'Shock Sensors', capability: 'shockSensor', attributes: ['shock'] ],
+        'signalStrengthMeters': [ title: 'Signal Strength Meters', capability: 'signalStrength', attributes: ['lqi', 'rssi'] ],
+        'sleepSensors': [ title: 'Sleep Sensors', capability: 'sleepSensor', attributes: ['sleeping'] ],
+        'smokeDetectors': [ title: 'Smoke Detectors', capability: 'smokeDetector', attributes: ['smoke'] ],
+        'soundSensors': [ title: 'Sound Sensors', capability: 'soundSensor', attributes: ['sound'] ],
+        'spls': [ title: 'Sound Pressure Level Sensors', capability: 'soundPressureLevel', attributes: ['soundPressureLevel'] ],
+        'switches': [ title: 'Switches', capability: 'switch', attributes: ['switch'] ],
+        'switchLevels': [ title: 'Switch Levels', capability: 'switchLevel', attributes: ['level'] ],
+        'tamperAlerts': [ title: 'Tamper Alerts', capability: 'tamperAlert', attributes: ['tamper'] ],
+        'temperatures': [ title: 'Temperature Sensors', capability: 'temperatureMeasurement', attributes: ['temperature'] ],
+        'thermostats': [ title: 'Thermostats', capability: 'thermostat', attributes: ['temperature', 'heatingSetpoint', 'coolingSetpoint', 'thermostatSetpoint', 'thermostatMode', 'thermostatFanMode', 'thermostatOperatingState', 'thermostatSetpointMode', 'scheduledSetpoint'] ],
+        'threeAxis': [ title: 'Three-axis (Orientation) Sensors', capability: 'threeAxis', attributes: ['threeAxis'] ],
+        'touchs': [ title: 'Touch Sensors', capability: 'touchSensor', attributes: ['touch'] ],
+        'uvs': [ title: 'UV Sensors', capability: 'ultravioletIndex', attributes: ['ultravioletIndex'] ],
+        'valves': [ title: 'Valves', capability: 'valve', attributes: ['valve'] ],
+        'volts': [ title: 'Voltage Meters', capability: 'voltageMeasurement', attributes: ['voltage'] ],
+        'waterSensors': [ title: 'Water Sensors', capability: 'waterSensor', attributes: ['water'] ],
+        'windowShades': [ title: 'Window Shades', capability: 'windowShade', attributes: ['windowShade'] ]
 ]
 
 // Momentary attributes that should be ignored for keep alive
 @Field static final List<String> momentaryAttributes = [
-    'pushed', 'doubleTapped', 'held', 'released'
+        'pushed', 'doubleTapped', 'held', 'released'
 ]
 
 @Field static final Map<Integer,String> logOptions = [
-    0 : "None",
-    1 : "Error",
-    2 : "Warning",
-    3 : "Info",
-    4 : "Debug"
+        0 : "None",
+        1 : "Error",
+        2 : "Warning",
+        3 : "Info",
+        4 : "Debug"
 ]
 @Field static final Integer logNone  = 0
 @Field static final Integer logError = 1
@@ -175,68 +176,68 @@ def setupMain() {
             input "appName", "text", title: "Aplication Name", multiple: false, required: true, submitOnChange: true, defaultValue: app.getLabel()
 
             input(
-                name: "configLoggingLevelIDE",
-                title: "System log level - messages with this level and higher will be sent to the system log",
-                type: "enum",
-                options: logOptions,
-                defaultValue: "${logWarn}",
-                required: false
+                    name: "configLoggingLevelIDE",
+                    title: "System log level - messages with this level and higher will be sent to the system log",
+                    type: "enum",
+                    options: logOptions,
+                    defaultValue: "${logWarn}",
+                    required: false
             )
         }
 
         section("\n<h3>InfluxDB Settings:</h3>") {
             href(
-                name: "href",
-                title: "InfluxDB connection",
-                description : prefDatabaseHost == null ? "Configure database connection parameters" : uriString(),
-                required: true,
-                page: "connectionPage"
+                    name: "href",
+                    title: "InfluxDB connection",
+                    description : prefDatabaseHost == null ? "Configure database connection parameters" : uriString(),
+                    required: true,
+                    page: "connectionPage"
             )
             input(
-                name: "prefBatchTimeLimit",
-                title: "Batch time limit - maximum number of seconds before writing a batch to InfluxDB (range 1-300)",
-                type: "number",
-                range: "1..300",
-                defaultValue: "60",
-                required: true
+                    name: "prefBatchTimeLimit",
+                    title: "Batch time limit - maximum number of seconds before writing a batch to InfluxDB (range 1-300)",
+                    type: "number",
+                    range: "1..300",
+                    defaultValue: "60",
+                    required: true
             )
             input(
-                name: "prefBatchSizeLimit",
-                title: "Batch size limit - maximum number of events in a batch to InfluxDB (range 1-250)",
-                type: "number",
-                range: "1..250",
-                defaultValue: "50",
-                required: true
+                    name: "prefBatchSizeLimit",
+                    title: "Batch size limit - maximum number of events in a batch to InfluxDB (range 1-250)",
+                    type: "number",
+                    range: "1..250",
+                    defaultValue: "50",
+                    required: true
             )
             input(
-                name: "prefBacklogLimit",
-                title: "Backlog size limit - maximum number of queued events before dropping failed posts (range 1-10000)",
-                type: "number",
-                range: "1..10000",
-                defaultValue: "5000",
-                required: true
+                    name: "prefBacklogLimit",
+                    title: "Backlog size limit - maximum number of queued events before dropping failed posts (range 1-10000)",
+                    type: "number",
+                    range: "1..10000",
+                    defaultValue: "5000",
+                    required: true
             )
         }
-        
+
         section("\n<h3>Event Handling:</h3>") {
             input(
-                // NB: Called prefSoftPollingInterval for backward compatibility with prior versions
-                name: "prefSoftPollingInterval",
-                title: "Post keep alive events (aka softpoll) - check every softpoll interval and re-post last value if a new event has not occurred in this time",
-                type: "enum",
-                options: [
-                    "0" : "disabled",
-                    "1" : "1 minute (not recommended)",
-                    "5" : "5 minutes",
-                    "10" : "10 minutes",
-                    "15" : "15 minutes",
-                    "30" : "30 minutes",
-                    "60" : "60 minutes",
-                    "180" : "3 hours"
-                ],
-                defaultValue: "15",
-                submitOnChange: true,
-                required: true
+                    // NB: Called prefSoftPollingInterval for backward compatibility with prior versions
+                    name: "prefSoftPollingInterval",
+                    title: "Post keep alive events (aka softpoll) - check every softpoll interval and re-post last value if a new event has not occurred in this time",
+                    type: "enum",
+                    options: [
+                            "0" : "disabled",
+                            "1" : "1 minute (not recommended)",
+                            "5" : "5 minutes",
+                            "10" : "10 minutes",
+                            "15" : "15 minutes",
+                            "30" : "30 minutes",
+                            "60" : "60 minutes",
+                            "180" : "3 hours"
+                    ],
+                    defaultValue: "15",
+                    submitOnChange: true,
+                    required: true
             )
             if (prefSoftPollingInterval?.toInteger()) {
                 input "prefPostHubInfo", "bool", title:"Post Hub information (IP, firmware, uptime, mode, sunrise/sunset) to InfluxDB", defaultValue: false
@@ -269,13 +270,41 @@ def setupMain() {
                 }
             }
         }
+
         section('<b>Notification Options</b>') {
             input 'notifyEnabled', 'bool', title: 'Enable Notification', required: false, defaultValue: false
             input name: 'notificationDevice', type: 'capability.notification', title: 'Send notification of rate limit consumption :', multiple: true
             input 'backlogNotifyLimit', 'number', title: 'Backlog Limit to send notification for backlog growing.', required: false , range: '1..5000', defaultValue: 500
             input 'backlogNotifyFreq', 'number', title: 'Minimum time limit between notifications in min.', required: false , range: '1..1440', defaultValue: 500
         }
-        
+
+        section("Variables To Monitor:", hideable:true, hidden:false) {
+            input "booleanVariables", "enum", title: "Select Boolean Variables", multiple: true, submitOnChange: true,
+                    options: getAllGlobalVars().findAll {
+                        it.value.type == "boolean"
+                    }.keySet().collect().sort { it.capitalize() }
+
+            input "numberVariables", "enum", title: "Select Number Variables", multiple: true, submitOnChange: true,
+                    options: getAllGlobalVars().findAll {
+                        it.value.type == "integer"
+                    }.keySet().collect().sort { it.capitalize() }
+
+            input "decimalVariables", "enum", title: "Select Decimal Variables", multiple: true, submitOnChange: true,
+                    options: getAllGlobalVars().findAll {
+                        it.value.type == "bigdecimal"
+                    }.keySet().collect().sort { it.capitalize() }
+
+            input "stringVariables", "enum", title: "Select String Variables", multiple: true, submitOnChange: true,
+                    options: getAllGlobalVars().findAll {
+                        it.value.type == "string"
+                    }.keySet().collect().sort { it.capitalize() }
+
+            input "datetimeVariables", "enum", title: "Select DateTime Variables", multiple: true, submitOnChange: true,
+                    options: getAllGlobalVars().findAll {
+                        it.value.type == "datetime"
+                    }.keySet().collect().sort { it.capitalize() }
+        }
+
     }
 }
 
@@ -290,15 +319,15 @@ def connectionPage() {
             input "prefDatabaseHost", "text", title: "Host", defaultValue: "", required: true
             input "prefDatabasePort", "text", title : "Port", defaultValue : prefDatabaseTls ? "443" : "8086", required : false
             input(
-                name: "prefInfluxVer",
-                title: "Influx Version",
-                type: "enum",
-                options: [
-                    "1" : "v1.x",
-                    "2" : "v2.x"
-                ],
-                defaultValue: "1",
-                submitOnChange: true
+                    name: "prefInfluxVer",
+                    title: "Influx Version",
+                    type: "enum",
+                    options: [
+                            "1" : "v1.x",
+                            "2" : "v2.x"
+                    ],
+                    defaultValue: "1",
+                    submitOnChange: true
             )
             if (prefInfluxVer == "1") {
                 input "prefDatabaseName", "text", title: "Database Name", defaultValue: "Hubitat", required: true
@@ -308,16 +337,16 @@ def connectionPage() {
                 input "prefBucket", "text", title: "Bucket", defaultValue: "", required: true
             }
             input(
-                name: "prefAuthType",
-                title: "Authorization Type",
-                type: "enum",
-                options: [
-                    "none" : "None",
-                    "basic" : "Username / Password",
-                    "token" : "Token"
-                ],
-                defaultValue: "none",
-                submitOnChange: true
+                    name: "prefAuthType",
+                    title: "Authorization Type",
+                    type: "enum",
+                    options: [
+                            "none" : "None",
+                            "basic" : "Username / Password",
+                            "token" : "Token"
+                    ],
+                    defaultValue: "none",
+                    submitOnChange: true
             )
             if (prefAuthType == "basic") {
                 input "prefDatabaseUser", "text", title: "Username", defaultValue: "", required: true
@@ -382,6 +411,12 @@ void updated() {
     // Subscribe to mode events if requested
     if (prefPostHubInfo) {
         subscribe(location, "mode", handleModeEvent)
+    }
+
+    // Subscribe to variables
+    (booleanVariables + numberVariables + decimalVariables + stringVariables + datetimeVariables).each { name ->
+        subscribe(location, "variable:" + name, handleVariableEvent, ["filterEvents": filterEvents])
+        logger("Subscribing to variable ${name}", logInfo)
     }
 
     // Clear out any prior schedules
@@ -466,7 +501,7 @@ private Map<String,List> getDeviceAttrMap() {
  * hubRestartHandler()
  *
  * Handle hub restarts.
-**/
+ **/
 void hubRestartHandler(evt) {
     if (prefPostHubInfo) {
         handleModeEvent(null)
@@ -629,9 +664,9 @@ private String encodeDeviceEvent(evt) {
             valueBinary = (evt.value == 'closed') ? '1i' : '0i'
             break
 
-        // The Mysterious Case of The Button
-        // binary value: released = 0, <any other value> = 1
-        // Note that button attributes are excluded from softpoll
+            // The Mysterious Case of The Button
+            // binary value: released = 0, <any other value> = 1
+            // Note that button attributes are excluded from softpoll
         case 'doubleTapped':
         case 'held':
         case 'pushed':
@@ -708,6 +743,67 @@ private String encodeDeviceEvent(evt) {
 }
 
 /**
+ *  encodeDeviceEvent(evt)
+ *
+ *  Builds data from variable polls or variable change events to send to InfluxDB.
+ *   - Escapes and quotes string values.
+ *   - Interprets binary variables to write to valueBinary
+ **/
+private String encodeVariableEvent(evt) {
+    String variableName = evt.name.substring(9)
+
+    String variableNameEscaped = escapeStringForInfluxDB(variableName)
+    String measurement = ""
+    String value = ""
+    String valueBinary = ""
+
+    if (booleanVariables.contains(variableName)) {
+        measurement = "binaryVariable"
+        value = evt.value
+        valueBinary = Boolean.valueOf(evt.value) ? '1i' : '0i'
+    }
+    else if (numberVariables.contains(variableName)) {
+        measurement = "numberVariable"
+        value = evt.value
+    }
+    else if (decimalVariables.contains(variableName)) {
+        measurement = "decimalVariable"
+        value = evt.value
+    }
+    else if (stringVariables.contains(variableName)) {
+        measurement = "stringVariable"
+        value = '"' + escapeStringForInfluxDB(evt.value) + '"'
+    }
+    else if (datetimeVariables.contains(variableName)) {
+        measurement = "datetimeVariable"
+        String datetime = evt.value
+        String[] datetimeSplitted = datetime.split(' ')
+        value = '"' + escapeStringForInfluxDB(evt.value) + '"'
+    }
+
+    String data = "${measurement},variableName=${variableNameEscaped}"
+
+    // Add hub name (location) tag if requested
+    if (settings.includeHubInfo == null || settings.includeHubInfo) {
+        String hubName = escapeStringForInfluxDB(location.name)
+        data += ",hubName=${hubName}"
+    }
+
+    data += " value=${value}"
+
+    if (valueBinary) {
+        data += ",valueBinary=${valueBinary}"
+    }
+
+    // Add the event timestamp
+    long eventTimestamp = evt.unixTime * 1e6 // milliseconds to nanoseconds
+    data += " ${eventTimestamp}"
+
+    // Return the completed string
+    return(data)
+}
+
+/**
  *  handleEvent(evt)
  *
  *  Builds data to send to InfluxDB.
@@ -720,6 +816,21 @@ void handleEvent(evt) {
 
     // Encode the event
     data = encodeDeviceEvent(evt)
+
+    // Add event to the queue for InfluxDB
+    queueToInfluxDb([data])
+}
+
+/**
+ *  handleVariableEvent(evt)
+ *
+ *  Build InfluxDB write string from variable change event.
+ **/
+void handleVariableEvent(evt) {
+    logger("Handle Variable Event: ${evt}", logDebug)
+
+    // Encode the event
+    data = encodeVariableEvent(evt)
 
     // Add event to the queue for InfluxDB
     queueToInfluxDb([data])
@@ -795,13 +906,13 @@ void softPoll() {
                 if (activityMinutes > state.softPollingInterval) {
                     logger("Keep alive for device ${device}(${attr})", logDebug)
                     event = encodeDeviceEvent([
-                        name: attr,
-                        value: device.latestState(attr).value,
-                        unit: device.latestState(attr).unit,
-                        device: device,
-                        deviceId: device.id,
-                        displayName: device.displayName,
-                        unixTime: timeNow
+                            name: attr,
+                            value: device.latestState(attr).value,
+                            unit: device.latestState(attr).unit,
+                            device: device,
+                            deviceId: device.id,
+                            displayName: device.displayName,
+                            unixTime: timeNow
                     ])
                     eventList.add(event)
                 }
@@ -820,8 +931,46 @@ void softPoll() {
         eventList.add(encodeHubInfo(null))
     }
 
+    eventList += getVariableEventList()
+
     // Queue the events
     queueToInfluxDb(eventList)
+}
+
+/**
+ *  getVariableEventList()
+ *
+ *  Polls all variables on the hub, read the variables that InfluxDB logger is tracking,
+ *  and create events to be queued to write to InfluxDB.
+ **/
+List<String> getVariableEventList() {
+    // Get all variables
+    Map<String,Map<String,String>> allVariables = getAllGlobalVars()
+
+    // Create the list
+    Long timeNow = now()
+    List<String> eventList = []
+
+    List<String> subscribedVariables = []
+
+    if (booleanVariables) { subscribedVariables += booleanVariables }
+    if (numberVariables) { subscribedVariables += numberVariables }
+    if (decimalVariables) { subscribedVariables += decimalVariables }
+    if (stringVariables) { subscribedVariables += stringVariables }
+    if (datetimeVariables) { subscribedVariables += datetimeVariables }
+
+    subscribedVariables.each { name ->
+        Map<String, String> variable = allVariables[name]
+        String event = encodeVariableEvent([
+                name: "variable:" + name,
+                value: variable.value,
+                unixTime: timeNow
+        ])
+        eventList.add(event)
+    }
+
+    // Return the events
+    return(eventList)
 }
 
 /**
@@ -859,7 +1008,7 @@ private void queueToInfluxDb(List<String> eventList) {
  *  Posts data to InfluxDB queue.
  *
  *  NB: Function name writeQueuedDataToInfluxDb must be kept for backward compatibility
-**/
+ **/
 void writeQueuedDataToInfluxDb() {
     if (state.loggerQueue == null) {
         // Failsafe if coming from an old version
@@ -923,13 +1072,13 @@ void writeQueuedDataToInfluxDb() {
 
     // Post it
     def postParams = [
-        uri: state.uri,
-        requestContentType: 'application/json',
-        contentType: 'application/json',
-        headers: state.headers,
-        ignoreSSLIssues: settings.prefIgnoreSSLIssues,
-        timeout: 60,
-        body: data
+            uri: state.uri,
+            requestContentType: 'application/json',
+            contentType: 'application/json',
+            headers: state.headers,
+            ignoreSSLIssues: settings.prefIgnoreSSLIssues,
+            timeout: 60,
+            body: data
     ]
     asynchttpPost('handleInfluxResponse', postParams, [ postTime: timeNow ])
 }
@@ -956,7 +1105,7 @@ void handleInfluxResponse(hubResponse, closure) {
     // Migration: Old configurations will not have dbStatus.
     if (state.dbStatus == null) {
         state.dbStatus = "success"
-    } 
+    }
 
     if (hubResponse.status < 400) {
         logger("Post of ${postCount} events complete - elapsed time ${elapsed} seconds - Status: ${hubResponse.status}", logInfo)
@@ -964,7 +1113,7 @@ void handleInfluxResponse(hubResponse, closure) {
             state.dbStatus = "success"
             state.dbStatusChg = now()
             sendnotification(state.dbStatus, backlogNotifyLimit)
-        }  
+        }
     }
     else {
         logger("Post of ${postCount} events failed - elapsed time ${elapsed} seconds - Status: ${hubResponse.status}, Error: ${hubResponse.errorMessage}, Headers: ${hubResponse.headers}, Data: ${data}", logWarn)
@@ -972,10 +1121,10 @@ void handleInfluxResponse(hubResponse, closure) {
             state.dbStatus = "failed"
             state.dbStatusChg = now()
             state.lastNotification = now()-(backlogNotifyLimit*60000)
-        } 
+        }
         if ((state.loggerQueue.size() > backlogNotifyLimit) && ((now() - state.lastNotification) > (backlogNotifyFreq*60000))){
             sendnotification(state.dbStatus, backlogNotifyLimit)
-        } 
+        }
         if (postCount == 1) {
             logger("Failed record was: ${state.loggerQueue[0]}", logError)
         }
@@ -1106,8 +1255,8 @@ private def sendnotification (type, value) {
         if (state.loggerQueue.size() > backlogNotifyLimit) {
             String notificationText = "InfluxDB Logger DB post state is ${type}: Current Backlog is ${state.loggerQueue.size()}."
             notificationDevice?.each {
-            it.deviceNotification(notificationText)
-            state.lastNotification = now()
+                it.deviceNotification(notificationText)
+                state.lastNotification = now()
             }
         }
     }
@@ -1135,4 +1284,4 @@ private String escapeStringForInfluxDB(String str) {
     str = str.replaceAll("\"", "\\\\\"") // Escape double quotes.
 
     return str
-}
+}}
