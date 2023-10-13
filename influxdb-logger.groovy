@@ -1284,4 +1284,4 @@ private String escapeStringForInfluxDB(String str) {
     str = str.replaceAll("\"", "\\\\\"") // Escape double quotes.
 
     return str
-}}
+}
