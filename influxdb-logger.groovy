@@ -1,83 +1,9 @@
 /* groovylint-disable LineLength, MethodParameterTypeRequired, MethodReturnTypeRequired, MethodSize, NestedBlockDepth, NoDef, ParameterReassignment, PublicMethodsBeforeNonPublicMethods, UnnecessaryGString, UnnecessaryGetter, UnnecessaryObjectReferences, UnusedMethodParameter, VariableTypeRequired */
 /*****************************************************************************************************************
- *  Source: https://github.com/HubitatCommunity/InfluxDB-Logger
+ *  Source: https://github.com/aerickson/Hubitat-InfluxDB-Logger
  *
- *  Raw Source: https://raw.githubusercontent.com/HubitatCommunity/InfluxDB-Logger/master/influxdb-logger.groovy
+ *  Raw Source: https://raw.githubusercontent.com/aerickson/Hubitat-InfluxDB-Logger/master/influxdb-logger.groovy
  *
- *  Forked from: https://github.com/codersaur/SmartThings/tree/master/smartapps/influxdb-logger
- *  Original Author: David Lomas (codersaur)
- *  Previous Author: Joshua Marker (tooluser)
- *  Hubitat Elevation version maintained by HubitatCommunity (https://github.com/HubitatCommunity/InfluxDB-Logger)
- *
- *  License:
- *   Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
- *   in compliance with the License. You may obtain a copy of the License at:
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *   Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
- *   on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
- *   for the specific language governing permissions and limitations under the License.
- *
- *   Modifcation History
- *   Date       Name            Change
- *   2019-02-02 Dan Ogorchock   Use asynchttpPost() instead of httpPost() call
- *   2019-09-09 Caleb Morse     Support deferring writes and doing bulk writes to influxdb
- *   2022-06-20 Denny Page      Remove nested sections for device selection.
- *   2023-01-08 Denny Page      Address whitespace related lint issues. No functional changes.
- *   2023-01-09 Craig King      Added InfluxDb2.x support.
- *   2023-01-12 Denny Page      Automatic migration of Influx 1.x settings.
- *   2023-01-15 Denny Page      Clean up various things:
- *                              Remove Group ID/Name which are not supported on Hubitat.
- *                              Remove Location ID and Hub ID which are not supported on Hubitat (always 1).
- *                              Remove blocks of commented out code.
- *                              Don't set page sections hidden to false where hideable is false.
- *                              Remove state.queuedData.
- *   2023-01-22 PJ              Add filterEvents option for subscribe.
- *                              Fix event timestamps.
- *   2023-01-23 Denny Page      Allow multiple instances of the application to be installed.
- *                              NB: This requires Hubitat 2.2.9 or above.
- *   2023-01-25 Craig King      Updated Button selection to valid capability for Hubitat
- *   2023-02-16 PJ              Add error message to log for http response >= 400
- *                              Allow ssl cert verification to be disabled (self signed certificates)
- *   2023-02-26 Denny Page      Cleanup and rationalize UI
- *                              Use time since first data value to trigger post rather than periodic timer
- *                              Only create a keep alive event (softpoll) when no real event has been seen
- *                              Cleanup and rationalize logging
- *                              Further code cleanup
- *   2023-02-28 Denny Page      Retry failed posts
- *                              Enhance post logging
- *                              Allow Hub Name and Location tags to be disabled for device events
- *                              Further code cleanup
- *   2023-03-04 Denny Page      Clean up event processing code
- *                              Fix button event handling
- *                              Fix thermostat fan mode event handling
- *                              Fix threeAxis event encoding
- *                              Add device event handling for filters, gas detectors, power source
- *                              Remove handling for non-existent device capabilities
- *                              Move unnecessary info messages to debug
- *                              Disable debug logging of post data which drives hubs into the ground
- *                              Provide info logging of event data to replace post data logging
- *                              Allow backlog to be set as low as 1, allowing bad records to be cleared
- *   2023-03-12 Denny Page      Use a unified device type / attribute map (deviceTypeMap)
- *                              Unify advanced and non-advanced device selection processing
- *                              Move device event encoding out to a separate function
- *                              Enhance queueToInfluxDb to accept a list of events
- *                              Complete rewrite of softpoll (take advantage of queueToInfluxDb lists)
- *                              Remove unnecessary state variables
- *                              Don't re-schedule batch post based on batch size, wait for existing timer
- *                              Improve backlog warnings
- *                              Lower backlog limits to prevent issues with app database size
- *                              Normalize Hub information logging
- *   2023-03-14 Denny Page      If post of size one fails, log the actual failed record
- *                              Ignore momentary attributes for keep alive
- *                              Display full uri in config page for convenience
- *   2023-03-15 Denny Page      Always treat valid numbers (such as buttons) as numeric values for InfluxDB
- *   2023-03-16 Denny Page      Fix issue of quotes surrounding hub name
- *                              Fix issue of invalid three axis values being posted as a string
- *   2023-03-18 Denny Page      Fix valve attribute
- *                              Clean up logging
- *   2023-04-24 Denny Page      Don't send null units to InfluxDB
  *****************************************************************************************************************/
 
 // Note: Items marked as "Migration" are intended to be kept for a period of time and then be removed circa end of 2023
