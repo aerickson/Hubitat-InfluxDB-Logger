@@ -6,7 +6,7 @@
 
 This app can now be installed with [HPM](https://hubitatpackagemanager.hubitatcommunity.com/). HPM will detect updates and offer to apply them.
 
-Click 'Install', 'From URL', and enter `https://raw.githubusercontent.com/aerickson/Hubitat-InfluxDB-Logger/master/influxdb-logger.groovy`. 
+Click 'Install', 'From URL', and enter `https://raw.githubusercontent.com/aerickson/Hubitat-InfluxDB-Logger/master/influxdb-logger.groovy`.
 
 ### Manual Installation
 
