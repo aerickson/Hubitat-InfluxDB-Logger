@@ -9,85 +9,85 @@
 // Note: Items marked as "Migration" are intended to be kept for a period of time and then be removed circa end of 2023
 
 definition(
-    name: "InfluxDB Logger",
-    namespace: "nowhereville",
-    author: "Hubitat Community",
-    description: "Log device states to InfluxDB",
-    category: "Utility",
-    importUrl: "https://raw.githubusercontent.com/aerickson/Hubitat-InfluxDB-Logger/master/influxdb-logger.groovy",
-    iconUrl: "",
-    iconX2Url: "",
-    iconX3Url: "",
-    singleThreaded: true
+        name: "InfluxDB Logger",
+        namespace: "nowhereville",
+        author: "Hubitat Community",
+        description: "Log device states to InfluxDB",
+        category: "Utility",
+        importUrl: "https://raw.githubusercontent.com/aerickson/Hubitat-InfluxDB-Logger/master/influxdb-logger.groovy",
+        iconUrl: "",
+        iconX2Url: "",
+        iconX3Url: "",
+        singleThreaded: true
 )
 
 import groovy.transform.Field
 
 // Device type list
-@Field static final Map<String,Map> deviceTypeMap = [
-    'accelerometers': [ title: 'Accelerometers', capability: 'accelerationSensor', attributes: ['acceleration'] ],
-    'alarms': [ title: 'Alarms', capability: 'alarm', attributes: ['alarm'] ],
-    'batteries': [ title: 'Batteries', capability: 'battery', attributes: ['battery'] ],
-    'beacons': [ title: 'Beacons', capability: 'beacon', attributes: ['presence'] ],
-    'buttons': [ title: 'Buttons', capability: 'pushableButton', attributes: ['pushed', 'doubleTapped', 'held', 'released'] ],
-    'cos': [ title: 'Carbon Monoxide Detectors', capability: 'carbonMonoxideDetector', attributes: ['carbonMonoxide'] ],
-    'co2s': [ title: 'Carbon Dioxide Detectors', capability: 'carbonDioxideMeasurement', attributes: ['carbonDioxide'] ],
-    'colors': [ title: 'Color Controllers', capability: 'colorControl', attributes: ['hue', 'saturation', 'color'] ],
-    'consumables': [ title: 'Consumables', capability: 'consumable', attributes: ['consumableStatus'] ],
-    'contacts': [ title: 'Contact Sensors', capability: 'contactSensor', attributes: ['contact'] ],
-    'currentMeters': [ title: 'Current Meters', capability: 'currentMeter', attributes: ['amperage'] ],
-    'doorsControllers': [ title: 'Door Controllers', capability: 'doorControl', attributes: ['door'] ],
-    'energyMeters': [ title: 'Energy Meters', capability: 'energyMeter', attributes: ['energy'] ],
-    'filters': [ title: 'Filters', capability: 'filterStatus', attributes: ['filterStatus'] ],
-    'gasDetectors': [ title: 'Gas Detectors', capability: 'gasDetector', attributes: ['naturalGas'] ],
-    'humidities': [ title: 'Humidity Meters', capability: 'relativeHumidityMeasurement', attributes: ['humidity'] ],
-    'illuminances': [ title: 'Illuminance Meters', capability: 'illuminanceMeasurement', attributes: ['illuminance'] ],
-    'liquidFlowMeters': [ title: 'Liquid Flow Meters', capability: 'liquidFlowRate', attributes: ['rate'] ],
-    'locks': [ title: 'Locks', capability: 'lock', attributes: ['lock'] ],
-    'motions': [ title: 'Motion Sensors', capability: 'motionSensor', attributes: ['motion'] ],
-    'musicPlayers': [ title: 'Music Players', capability: 'musicPlayer', attributes: ['status', 'level', 'trackDescription', 'trackData', 'mute'] ],
-    'peds': [ title: 'Pedometers', capability: 'stepSensor', attributes: ['steps', 'goal'] ],
-    'phMeters': [ title: 'pH Meters', capability: 'pHMeasurement', attributes: ['pH'] ],
-    'powerMeters': [ title: 'Power Meters', capability: 'powerMeter', attributes: ['power'] ],
-    'powerSources': [ title: 'Power Sources', capability: 'powerSource', attributes: ['powerSource'] ],
-    'presences': [ title: 'Presence Sensors', capability: 'presenceSensor', attributes: ['presence'] ],
-    'pressures': [ title: 'Pressure Sensors', capability: 'pressureMeasurement', attributes: ['pressure'] ],
-    'shockSensors': [ title: 'Shock Sensors', capability: 'shockSensor', attributes: ['shock'] ],
-    'signalStrengthMeters': [ title: 'Signal Strength Meters', capability: 'signalStrength', attributes: ['lqi', 'rssi'] ],
-    'sleepSensors': [ title: 'Sleep Sensors', capability: 'sleepSensor', attributes: ['sleeping'] ],
-    'smokeDetectors': [ title: 'Smoke Detectors', capability: 'smokeDetector', attributes: ['smoke'] ],
-    'soundSensors': [ title: 'Sound Sensors', capability: 'soundSensor', attributes: ['sound'] ],
-    'spls': [ title: 'Sound Pressure Level Sensors', capability: 'soundPressureLevel', attributes: ['soundPressureLevel'] ],
-    'switches': [ title: 'Switches', capability: 'switch', attributes: ['switch'] ],
-    'switchLevels': [ title: 'Switch Levels', capability: 'switchLevel', attributes: ['level'] ],
-    'tamperAlerts': [ title: 'Tamper Alerts', capability: 'tamperAlert', attributes: ['tamper'] ],
-    'temperatures': [ title: 'Temperature Sensors', capability: 'temperatureMeasurement', attributes: ['temperature'] ],
-    'thermostats': [ title: 'Thermostats', capability: 'thermostat', attributes: ['temperature', 'heatingSetpoint', 'coolingSetpoint', 'thermostatSetpoint', 'thermostatMode', 'thermostatFanMode', 'thermostatOperatingState', 'thermostatSetpointMode', 'scheduledSetpoint'] ],
-    'threeAxis': [ title: 'Three-axis (Orientation) Sensors', capability: 'threeAxis', attributes: ['threeAxis'] ],
-    'touchs': [ title: 'Touch Sensors', capability: 'touchSensor', attributes: ['touch'] ],
-    'uvs': [ title: 'UV Sensors', capability: 'ultravioletIndex', attributes: ['ultravioletIndex'] ],
-    'valves': [ title: 'Valves', capability: 'valve', attributes: ['valve'] ],
-    'volts': [ title: 'Voltage Meters', capability: 'voltageMeasurement', attributes: ['voltage'] ],
-    'waterSensors': [ title: 'Water Sensors', capability: 'waterSensor', attributes: ['water'] ],
-    'windowShades': [ title: 'Window Shades', capability: 'windowShade', attributes: ['windowShade'] ]
+@Field static final Map<String, Map> deviceTypeMap = [
+        'accelerometers'      : [title: 'Accelerometers', capability: 'accelerationSensor', attributes: ['acceleration']],
+        'alarms'              : [title: 'Alarms', capability: 'alarm', attributes: ['alarm']],
+        'batteries'           : [title: 'Batteries', capability: 'battery', attributes: ['battery']],
+        'beacons'             : [title: 'Beacons', capability: 'beacon', attributes: ['presence']],
+        'buttons'             : [title: 'Buttons', capability: 'pushableButton', attributes: ['pushed', 'doubleTapped', 'held', 'released']],
+        'cos'                 : [title: 'Carbon Monoxide Detectors', capability: 'carbonMonoxideDetector', attributes: ['carbonMonoxide']],
+        'co2s'                : [title: 'Carbon Dioxide Detectors', capability: 'carbonDioxideMeasurement', attributes: ['carbonDioxide']],
+        'colors'              : [title: 'Color Controllers', capability: 'colorControl', attributes: ['hue', 'saturation', 'color']],
+        'consumables'         : [title: 'Consumables', capability: 'consumable', attributes: ['consumableStatus']],
+        'contacts'            : [title: 'Contact Sensors', capability: 'contactSensor', attributes: ['contact']],
+        'currentMeters'       : [title: 'Current Meters', capability: 'currentMeter', attributes: ['amperage']],
+        'doorsControllers'    : [title: 'Door Controllers', capability: 'doorControl', attributes: ['door']],
+        'energyMeters'        : [title: 'Energy Meters', capability: 'energyMeter', attributes: ['energy']],
+        'filters'             : [title: 'Filters', capability: 'filterStatus', attributes: ['filterStatus']],
+        'gasDetectors'        : [title: 'Gas Detectors', capability: 'gasDetector', attributes: ['naturalGas']],
+        'humidities'          : [title: 'Humidity Meters', capability: 'relativeHumidityMeasurement', attributes: ['humidity']],
+        'illuminances'        : [title: 'Illuminance Meters', capability: 'illuminanceMeasurement', attributes: ['illuminance']],
+        'liquidFlowMeters'    : [title: 'Liquid Flow Meters', capability: 'liquidFlowRate', attributes: ['rate']],
+        'locks'               : [title: 'Locks', capability: 'lock', attributes: ['lock']],
+        'motions'             : [title: 'Motion Sensors', capability: 'motionSensor', attributes: ['motion']],
+        'musicPlayers'        : [title: 'Music Players', capability: 'musicPlayer', attributes: ['status', 'level', 'trackDescription', 'trackData', 'mute']],
+        'peds'                : [title: 'Pedometers', capability: 'stepSensor', attributes: ['steps', 'goal']],
+        'phMeters'            : [title: 'pH Meters', capability: 'pHMeasurement', attributes: ['pH']],
+        'powerMeters'         : [title: 'Power Meters', capability: 'powerMeter', attributes: ['power']],
+        'powerSources'        : [title: 'Power Sources', capability: 'powerSource', attributes: ['powerSource']],
+        'presences'           : [title: 'Presence Sensors', capability: 'presenceSensor', attributes: ['presence']],
+        'pressures'           : [title: 'Pressure Sensors', capability: 'pressureMeasurement', attributes: ['pressure']],
+        'shockSensors'        : [title: 'Shock Sensors', capability: 'shockSensor', attributes: ['shock']],
+        'signalStrengthMeters': [title: 'Signal Strength Meters', capability: 'signalStrength', attributes: ['lqi', 'rssi']],
+        'sleepSensors'        : [title: 'Sleep Sensors', capability: 'sleepSensor', attributes: ['sleeping']],
+        'smokeDetectors'      : [title: 'Smoke Detectors', capability: 'smokeDetector', attributes: ['smoke']],
+        'soundSensors'        : [title: 'Sound Sensors', capability: 'soundSensor', attributes: ['sound']],
+        'spls'                : [title: 'Sound Pressure Level Sensors', capability: 'soundPressureLevel', attributes: ['soundPressureLevel']],
+        'switches'            : [title: 'Switches', capability: 'switch', attributes: ['switch']],
+        'switchLevels'        : [title: 'Switch Levels', capability: 'switchLevel', attributes: ['level']],
+        'tamperAlerts'        : [title: 'Tamper Alerts', capability: 'tamperAlert', attributes: ['tamper']],
+        'temperatures'        : [title: 'Temperature Sensors', capability: 'temperatureMeasurement', attributes: ['temperature']],
+        'thermostats'         : [title: 'Thermostats', capability: 'thermostat', attributes: ['temperature', 'heatingSetpoint', 'coolingSetpoint', 'thermostatSetpoint', 'thermostatMode', 'thermostatFanMode', 'thermostatOperatingState', 'thermostatSetpointMode', 'scheduledSetpoint']],
+        'threeAxis'           : [title: 'Three-axis (Orientation) Sensors', capability: 'threeAxis', attributes: ['threeAxis']],
+        'touchs'              : [title: 'Touch Sensors', capability: 'touchSensor', attributes: ['touch']],
+        'uvs'                 : [title: 'UV Sensors', capability: 'ultravioletIndex', attributes: ['ultravioletIndex']],
+        'valves'              : [title: 'Valves', capability: 'valve', attributes: ['valve']],
+        'volts'               : [title: 'Voltage Meters', capability: 'voltageMeasurement', attributes: ['voltage']],
+        'waterSensors'        : [title: 'Water Sensors', capability: 'waterSensor', attributes: ['water']],
+        'windowShades'        : [title: 'Window Shades', capability: 'windowShade', attributes: ['windowShade']]
 ]
 
 // Momentary attributes that should be ignored for keep alive
 @Field static final List<String> momentaryAttributes = [
-    'pushed', 'doubleTapped', 'held', 'released'
+        'pushed', 'doubleTapped', 'held', 'released'
 ]
 
-@Field static final Map<Integer,String> logOptions = [
-    0 : "None",
-    1 : "Error",
-    2 : "Warning",
-    3 : "Info",
-    4 : "Debug"
+@Field static final Map<Integer, String> logOptions = [
+        0: "None",
+        1: "Error",
+        2: "Warning",
+        3: "Info",
+        4: "Debug"
 ]
-@Field static final Integer logNone  = 0
+@Field static final Integer logNone = 0
 @Field static final Integer logError = 1
-@Field static final Integer logWarn  = 2
-@Field static final Integer logInfo  = 3
+@Field static final Integer logWarn = 2
+@Field static final Integer logInfo = 3
 @Field static final Integer logDebug = 4
 
 preferences {
@@ -101,78 +101,78 @@ def setupMain() {
             input "appName", "text", title: "Aplication Name", multiple: false, required: true, submitOnChange: true, defaultValue: app.getLabel()
 
             input(
-                name: "configLoggingLevelIDE",
-                title: "System log level - messages with this level and higher will be sent to the system log",
-                type: "enum",
-                options: logOptions,
-                defaultValue: "${logWarn}",
-                required: false
+                    name: "configLoggingLevelIDE",
+                    title: "System log level - messages with this level and higher will be sent to the system log",
+                    type: "enum",
+                    options: logOptions,
+                    defaultValue: "${logWarn}",
+                    required: false
             )
         }
 
         section("\n<h3>InfluxDB Settings:</h3>") {
             href(
-                name: "href",
-                title: "InfluxDB connection",
-                description : prefDatabaseHost == null ? "Configure database connection parameters" : uriString(),
-                required: true,
-                page: "connectionPage"
+                    name: "href",
+                    title: "InfluxDB connection",
+                    description: prefDatabaseHost == null ? "Configure database connection parameters" : uriString(),
+                    required: true,
+                    page: "connectionPage"
             )
             input(
-                name: "prefBatchTimeLimit",
-                title: "Batch time limit - maximum number of seconds before writing a batch to InfluxDB (range 1-300)",
-                type: "number",
-                range: "1..300",
-                defaultValue: "60",
-                required: true
+                    name: "prefBatchTimeLimit",
+                    title: "Batch time limit - maximum number of seconds before writing a batch to InfluxDB (range 1-300)",
+                    type: "number",
+                    range: "1..300",
+                    defaultValue: "60",
+                    required: true
             )
             input(
-                name: "prefBatchSizeLimit",
-                title: "Batch size limit - maximum number of events in a batch to InfluxDB (range 1-250)",
-                type: "number",
-                range: "1..250",
-                defaultValue: "50",
-                required: true
+                    name: "prefBatchSizeLimit",
+                    title: "Batch size limit - maximum number of events in a batch to InfluxDB (range 1-250)",
+                    type: "number",
+                    range: "1..250",
+                    defaultValue: "50",
+                    required: true
             )
             input(
-                name: "prefBacklogLimit",
-                title: "Backlog size limit - maximum number of queued events before dropping failed posts (range 1-10000)",
-                type: "number",
-                range: "1..10000",
-                defaultValue: "5000",
-                required: true
+                    name: "prefBacklogLimit",
+                    title: "Backlog size limit - maximum number of queued events before dropping failed posts (range 1-10000)",
+                    type: "number",
+                    range: "1..10000",
+                    defaultValue: "5000",
+                    required: true
             )
         }
 
         section("\n<h3>Event Handling:</h3>") {
             input(
-                // NB: Called prefSoftPollingInterval for backward compatibility with prior versions
-                name: "prefSoftPollingInterval",
-                title: "Post keep alive events (aka softpoll) - check every softpoll interval and re-post last value if a new event has not occurred in this time",
-                type: "enum",
-                options: [
-                    "0" : "disabled",
-                    "1" : "1 minute (not recommended)",
-                    "5" : "5 minutes",
-                    "10" : "10 minutes",
-                    "15" : "15 minutes",
-                    "30" : "30 minutes",
-                    "60" : "60 minutes",
-                    "180" : "3 hours"
-                ],
-                defaultValue: "15",
-                submitOnChange: true,
-                required: true
+                    // NB: Called prefSoftPollingInterval for backward compatibility with prior versions
+                    name: "prefSoftPollingInterval",
+                    title: "Post keep alive events (aka softpoll) - check every softpoll interval and re-post last value if a new event has not occurred in this time",
+                    type: "enum",
+                    options: [
+                            "0"  : "disabled",
+                            "1"  : "1 minute (not recommended)",
+                            "5"  : "5 minutes",
+                            "10" : "10 minutes",
+                            "15" : "15 minutes",
+                            "30" : "30 minutes",
+                            "60" : "60 minutes",
+                            "180": "3 hours"
+                    ],
+                    defaultValue: "15",
+                    submitOnChange: true,
+                    required: true
             )
             if (prefSoftPollingInterval?.toInteger()) {
-                input "prefPostHubInfo", "bool", title:"Post Hub information (IP, firmware, uptime, mode, sunrise/sunset) to InfluxDB", defaultValue: false
+                input "prefPostHubInfo", "bool", title: "Post Hub information (IP, firmware, uptime, mode, sunrise/sunset) to InfluxDB", defaultValue: false
             }
-            input "includeHubInfo", "bool", title:"Include Hub Name as a tag for device events", defaultValue: true
-            input "filterEvents", "bool", title:"Only post device events to InfluxDB when the data value changes", defaultValue: true
+            input "includeHubInfo", "bool", title: "Include Hub Name as a tag for device events", defaultValue: true
+            input "filterEvents", "bool", title: "Only post device events to InfluxDB when the data value changes", defaultValue: true
         }
 
-        section("Devices To Monitor:", hideable:true, hidden:false) {
-            input "accessAllAttributes", "bool", title:"Advanced attribute selection?", defaultValue: false, submitOnChange: true
+        section("Devices To Monitor:", hideable: true, hidden: false) {
+            input "accessAllAttributes", "bool", title: "Advanced attribute selection?", defaultValue: false, submitOnChange: true
 
             if (accessAllAttributes) {
                 input name: "allDevices", type: "capability.*", title: "Selected Devices", multiple: true, required: false, submitOnChange: true
@@ -185,11 +185,10 @@ def setupMain() {
                         attrList.each { attr ->
                             options.add("${attr}")
                         }
-                        input name:"attrForDev${deviceId}", type: "enum", title: "$device", options: options.sort(), multiple: true, required: false, submitOnChange: true
+                        input name: "attrForDev${deviceId}", type: "enum", title: "$device", options: options.sort(), multiple: true, required: false, submitOnChange: true
                     }
                 }
-            }
-            else {
+            } else {
                 deviceTypeMap.each { name, entry ->
                     input "${name}", "capability.${entry.capability}", title: "${entry.title}", multiple: true, required: false
                 }
@@ -201,48 +200,46 @@ def setupMain() {
 def connectionPage() {
     dynamicPage(name: "connectionPage", title: "Connection Properties", install: false, uninstall: false) {
         section {
-            input "prefDatabaseTls", "bool", title:"Use TLS?", defaultValue: false, submitOnChange: true
+            input "prefDatabaseTls", "bool", title: "Use TLS?", defaultValue: false, submitOnChange: true
             if (prefDatabaseTls) {
-                input "prefIgnoreSSLIssues", "bool", title:"Ignore SSL cert verification issues", defaultValue:false
+                input "prefIgnoreSSLIssues", "bool", title: "Ignore SSL cert verification issues", defaultValue: false
             }
 
             input "prefDatabaseHost", "text", title: "Host", defaultValue: "", required: true
-            input "prefDatabasePort", "text", title : "Port", defaultValue : prefDatabaseTls ? "443" : "8086", required : false
+            input "prefDatabasePort", "text", title: "Port", defaultValue: prefDatabaseTls ? "443" : "8086", required: false
             input(
-                name: "prefInfluxVer",
-                title: "Influx Version",
-                type: "enum",
-                options: [
-                    "1" : "v1.x",
-                    "2" : "v2.x"
-                ],
-                defaultValue: "1",
-                submitOnChange: true
+                    name: "prefInfluxVer",
+                    title: "Influx Version",
+                    type: "enum",
+                    options: [
+                            "1": "v1.x",
+                            "2": "v2.x"
+                    ],
+                    defaultValue: "1",
+                    submitOnChange: true
             )
             if (prefInfluxVer == "1") {
                 input "prefDatabaseName", "text", title: "Database Name", defaultValue: "Hubitat", required: true
-            }
-            else if (prefInfluxVer == "2") {
+            } else if (prefInfluxVer == "2") {
                 input "prefOrg", "text", title: "Org", defaultValue: "", required: true
                 input "prefBucket", "text", title: "Bucket", defaultValue: "", required: true
             }
             input(
-                name: "prefAuthType",
-                title: "Authorization Type",
-                type: "enum",
-                options: [
-                    "none" : "None",
-                    "basic" : "Username / Password",
-                    "token" : "Token"
-                ],
-                defaultValue: "none",
-                submitOnChange: true
+                    name: "prefAuthType",
+                    title: "Authorization Type",
+                    type: "enum",
+                    options: [
+                            "none" : "None",
+                            "basic": "Username / Password",
+                            "token": "Token"
+                    ],
+                    defaultValue: "none",
+                    submitOnChange: true
             )
             if (prefAuthType == "basic") {
                 input "prefDatabaseUser", "text", title: "Username", defaultValue: "", required: true
                 input "prefDatabasePass", "text", title: "Password", defaultValue: "", required: true
-            }
-            else if (prefAuthType == "token") {
+            } else if (prefAuthType == "token") {
                 input "prefDatabaseToken", "text", title: "Token", required: true
             }
         }
@@ -287,7 +284,7 @@ void updated() {
     unsubscribe()
 
     // Create device subscriptions
-    Map<String,List> deviceAttrMap = getDeviceAttrMap()
+    Map<String, List> deviceAttrMap = getDeviceAttrMap()
     deviceAttrMap.each { device, attrList ->
         attrList.each { attr ->
             logger("Subscribing to ${device}: ${attr}", logInfo)
@@ -358,7 +355,7 @@ void updated() {
  * If using attribute selection, a device will appear only once in the array, with one or more attributes.
  * If using capability selection, a device may appear multiple times in the array, each time with a single attribue.
  **/
-private Map<String,List> getDeviceAttrMap() {
+private Map<String, List> getDeviceAttrMap() {
     deviceAttrMap = [:]
 
     if (settings.accessAllAttributes) {
@@ -366,8 +363,7 @@ private Map<String,List> getDeviceAttrMap() {
             deviceId = device.getId()
             deviceAttrMap[device] = settings["attrForDev${deviceId}"]
         }
-    }
-    else {
+    } else {
         deviceTypeMap.each { name, entry ->
             deviceList = settings."${name}"
             if (deviceList) {
@@ -385,7 +381,7 @@ private Map<String,List> getDeviceAttrMap() {
  * hubRestartHandler()
  *
  * Handle hub restarts.
-**/
+ **/
 void hubRestartHandler(evt) {
     if (prefPostHubInfo) {
         handleModeEvent(null)
@@ -523,7 +519,7 @@ private String encodeDeviceEvent(evt) {
             unit = evt.name
             try {
                 /* groovylint-disable-next-line UnusedVariable, VariableName */
-                def (_,x,y,z) = (evt.value =~ /^\[x:(-?[0-9]{1,3}),y:(-?[0-9]{1,3}),z:(-?[0-9]{1,3})\]$/)[0]
+                def (_, x, y, z) = (evt.value =~ /^\[x:(-?[0-9]{1,3}),y:(-?[0-9]{1,3}),z:(-?[0-9]{1,3})\]$/)[0]
                 value = "valueX=${x}i,valueY=${y}i,valueZ=${z}i" // values are integers
             }
             catch (e) {
@@ -548,9 +544,9 @@ private String encodeDeviceEvent(evt) {
             valueBinary = (evt.value == 'closed') ? '1i' : '0i'
             break
 
-        // The Mysterious Case of The Button
-        // binary value: released = 0, <any other value> = 1
-        // Note that button attributes are excluded from softpoll
+            // The Mysterious Case of The Button
+            // binary value: released = 0, <any other value> = 1
+            // Note that button attributes are excluded from softpoll
         case 'doubleTapped':
         case 'held':
         case 'pushed':
@@ -568,8 +564,7 @@ private String encodeDeviceEvent(evt) {
         if (valueBinary) {
             // If a binary value was set, use the event name as the unit tag.
             unit = escapeStringForInfluxDB(evt.name)
-        }
-        else if (evt.unit) {
+        } else if (evt.unit) {
             // Otherwise, use the event unit if defined.
             unit = escapeStringForInfluxDB(evt.unit)
         }
@@ -581,8 +576,7 @@ private String encodeDeviceEvent(evt) {
             // It's a number. Common numerical events such as carbonDioxide, power, energy,
             // humidity, level, temperature, ultravioletIndex, voltage, etc. are handled here.
             value = evt.value
-        }
-        else {
+        } else {
             // Everything else is a string.
             value = '"' + escapeStringForInfluxDB(evt.value) + '"'
         }
@@ -610,8 +604,7 @@ private String encodeDeviceEvent(evt) {
     if (value ==~ /^value.*/) {
         // Assignment has already been done above (e.g. threeAxis)
         data += " ${value}"
-    }
-    else {
+    } else {
         data += " value=${value}"
     }
     if (valueBinary) {
@@ -623,7 +616,7 @@ private String encodeDeviceEvent(evt) {
     data += " ${eventTimestamp}"
 
     // Return the completed string
-    return(data)
+    return (data)
 }
 
 /**
@@ -660,7 +653,8 @@ private String encodeHubInfo(evt) {
     String sunriseTime = escapeStringForInfluxDB(times.sunrise.format("HH:mm", location.timeZone))
     String sunsetTime = escapeStringForInfluxDB(times.sunset.format("HH:mm", location.timeZone))
 
-    Long eventTimestamp = (evt?.unixTime ? evt.unixTime : now()) * 1e6       // Time is in milliseconds, but InfluxDB expects nanoseconds
+    Long eventTimestamp = (evt?.unixTime ? evt.unixTime : now()) * 1e6
+    // Time is in milliseconds, but InfluxDB expects nanoseconds
 
     String data = "_hubInfo,hubName=${hubName} localIP=\"${localIP}\",firmwareVersion=\"${firmwareVersion}\",upTime=\"${upTime}\",mode=\"${mode}\",sunriseTime=\"${sunriseTime}\",sunsetTime=\"${sunsetTime}\" ${eventTimestamp}"
     return data
@@ -698,7 +692,7 @@ void softPoll() {
     }
 
     // Get the map
-    Map<String,List> deviceAttrMap = getDeviceAttrMap()
+    Map<String, List> deviceAttrMap = getDeviceAttrMap()
 
     // Create the list
     Long timeNow = now()
@@ -714,21 +708,19 @@ void softPoll() {
                 if (activityMinutes > state.softPollingInterval) {
                     logger("Keep alive for device ${device}(${attr})", logDebug)
                     event = encodeDeviceEvent([
-                        name: attr,
-                        value: device.latestState(attr).value,
-                        unit: device.latestState(attr).unit,
-                        device: device,
-                        deviceId: device.id,
-                        displayName: device.displayName,
-                        unixTime: timeNow
+                            name       : attr,
+                            value      : device.latestState(attr).value,
+                            unit       : device.latestState(attr).unit,
+                            device     : device,
+                            deviceId   : device.id,
+                            displayName: device.displayName,
+                            unixTime   : timeNow
                     ])
                     eventList.add(event)
-                }
-                else {
+                } else {
                     logger("Keep alive for device ${device}(${attr}) unnecessary - last activity ${activityMinutes} minutes", logDebug)
                 }
-            }
-            else {
+            } else {
                 logger("Keep alive for device ${device}(${attr}) suppressed - last activity never", logDebug)
             }
         }
@@ -778,7 +770,7 @@ private void queueToInfluxDb(List<String> eventList) {
  *  Posts data to InfluxDB queue.
  *
  *  NB: Function name writeQueuedDataToInfluxDb must be kept for backward compatibility
-**/
+ **/
 void writeQueuedDataToInfluxDb() {
     if (state.loggerQueue == null) {
         // Failsafe if coming from an old version
@@ -842,15 +834,15 @@ void writeQueuedDataToInfluxDb() {
 
     // Post it
     def postParams = [
-        uri: state.uri,
-        requestContentType: 'application/json',
-        contentType: 'application/json',
-        headers: state.headers,
-        ignoreSSLIssues: settings.prefIgnoreSSLIssues,
-        timeout: 60,
-        body: data
+            uri               : state.uri,
+            requestContentType: 'application/json',
+            contentType       : 'application/json',
+            headers           : state.headers,
+            ignoreSSLIssues   : settings.prefIgnoreSSLIssues,
+            timeout           : 60,
+            body              : data
     ]
-    asynchttpPost('handleInfluxResponse', postParams, [ postTime: timeNow ])
+    asynchttpPost('handleInfluxResponse', postParams, [postTime: timeNow])
 }
 
 /**
@@ -874,8 +866,7 @@ void handleInfluxResponse(hubResponse, closure) {
 
     if (hubResponse.status < 400) {
         logger("Post of ${postCount} events complete - elapsed time ${elapsed} seconds - Status: ${hubResponse.status}", logInfo)
-    }
-    else {
+    } else {
         logger("Post of ${postCount} events failed - elapsed time ${elapsed} seconds - Status: ${hubResponse.status}, Error: ${hubResponse.errorMessage}, Headers: ${hubResponse.headers}, Data: ${data}", logWarn)
         if (postCount == 1) {
             logger("Failed record was: ${state.loggerQueue[0]}", logError)
@@ -918,8 +909,7 @@ private String uriString() {
 
     if (settings?.prefDatabaseTls) {
         uri = "https://"
-    }
-    else {
+    } else {
         uri = "http://"
     }
 
@@ -930,8 +920,7 @@ private String uriString() {
 
     if (settings?.prefInfluxVer == "2") {
         uri += "/api/v2/write?org=${settings.prefOrg}&bucket=${settings.prefBucket}"
-    }
-    else {
+    } else {
         // Influx version 1
         uri += "/write?db=${settings.prefDatabaseName}"
     }
@@ -951,8 +940,7 @@ private void setupDB() {
             String userpass = "${settings.prefDatabaseUser}:${settings.prefDatabasePass}"
             headers.put("Authorization", "Basic " + userpass.bytes.encodeBase64())
         }
-    }
-    else if (settings.prefAuthType == "token") {
+    } else if (settings.prefAuthType == "token") {
         headers.put("Authorization", "Token ${settings.prefDatabaseToken}")
     }
 
