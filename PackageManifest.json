@@ -5,6 +5,7 @@
   "minimumHEVersion": "2.2.9",
   "dateReleased": "2023-08-18",
   "releaseNotes": "see https://github.com/aerickson/Hubitat-InfluxDB-Logger",
+  "documentationLink": "https://github.com/aerickson/Hubitat-InfluxDB-Logger/blob/master/README.md",
   "communityLink": "https://community.hubitat.com/t/influxdb-logger/110548",
   "apps": [
     {
